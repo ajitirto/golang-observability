@@ -1,25 +1,34 @@
-loki.source.docker "app" {
-  host    = "unix:///var/run/docker.sock"
-  targets = ["go-app"]
-  forward_to = [loki.process.app.receiver]
+discovery.docker "linux" {
+  host = "unix:///var/run/docker.sock"
 }
 
-loki.process "app" {
-  stage.json {
-    expressions = {
-      level    = "level",
-      msg      = "msg",
-      trace_id = "trace_id",
-      span_id  = "span_id",
-    }
+discovery.relabel "app" {
+  targets = discovery.docker.linux.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/go-app"
+    target_label  = "service"
+    replacement   = "go-app"
   }
 
-  stage.labels {
-    values = {
-      level = "level",
-    }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/go-app"
+    target_label  = "job"
+    replacement   = "go-app"
   }
 
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/go-app"
+    action        = "keep"
+  }
+}
+
+loki.source.docker "app" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.app.output
   forward_to = [loki.write.default.receiver]
 }
 

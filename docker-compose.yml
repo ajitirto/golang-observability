@@ -68,6 +68,8 @@ services:
   app:
     build: ./app
     container_name: go-app
+    labels:
+      logging: "enabled"
     ports:
       - "8080:8080"
     restart: unless-stopped
