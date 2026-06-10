@@ -1,5 +1,7 @@
 # Golang Observability Stack
 
+[evidence](./evidence-lgtm.png)
+
 Project ini adalah demonstrasi implementasi Full Observability Stack (Metrics, Logs, Traces) menggunakan Go, Prometheus, Loki, Tempo, Alloy, dan Grafana.
 
 ## Arsitektur
