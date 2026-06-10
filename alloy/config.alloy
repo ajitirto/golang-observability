@@ -1,14 +1,29 @@
-discovery.docker "containers" {
-  host = "unix:///var/run/docker.sock"
+loki.source.docker "app" {
+  host    = "unix:///var/run/docker.sock"
+  targets = ["go-app"]
+  forward_to = [loki.process.app.receiver]
 }
 
-loki.source.docker "containers" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.docker.containers.targets
-  forward_to = [loki.write.local.receiver]
+loki.process "app" {
+  stage.json {
+    expressions = {
+      level    = "level",
+      msg      = "msg",
+      trace_id = "trace_id",
+      span_id  = "span_id",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+
+  forward_to = [loki.write.default.receiver]
 }
 
-loki.write "local" {
+loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }

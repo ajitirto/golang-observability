@@ -47,7 +47,7 @@ Buka Grafana ([http://localhost:3000](http://localhost:3000)) dan navigasi ke Da
 
 #### B. Verifikasi Logs (Loki)
 - Cek panel **"Application Logs"**. Anda akan melihat log dalam format JSON.
-- Perhatikan field `trace` di dalam log. Klik pada baris log, dan jika konfigurasi benar, akan muncul tombol/link **"TraceID"** (Tempo) di sebelah ID trace tersebut.
+- Perhatikan field `trace_id` di dalam log. Klik pada baris log, dan jika konfigurasi benar, akan muncul tombol/link **"TraceID"** (Tempo) di sebelah ID trace tersebut.
 
 #### C. Verifikasi Traces (Tempo)
 - Klik link **"TraceID"** dari panel log, atau buka menu **Explore** -> Pilih datasource **Tempo**.
@@ -57,8 +57,33 @@ Buka Grafana ([http://localhost:3000](http://localhost:3000)) dan navigasi ke Da
 1. Pergi ke menu **Explore**.
 2. Pilih **Loki** dan jalankan query `{job="go-app"}`.
 3. Cari log dengan pesan `"request completed"`.
-4. Klik log tersebut, lalu klik link **Tempo** di field `trace`.
+4. Klik log tersebut, lalu klik link **Tempo** di field `trace_id`.
 5. Grafana akan membuka split view yang menampilkan detail tracing dari log tersebut secara otomatis.
+
+## Load Testing dengan Hey
+
+Untuk melihat bagaimana stack ini bekerja di bawah beban (load), Anda bisa menggunakan tool [hey](https://github.com/rakyll/hey).
+
+1. **Install hey** (jika belum ada):
+   ```bash
+   # Linux/macOS
+   go install github.com/rakyll/hey@latest
+   # Atau menggunakan brew
+   brew install hey
+   ```
+
+2. **Jalankan Load Test**:
+   Anda bisa menggunakan script yang sudah disediakan atau menjalankan perintah langsung:
+   ```bash
+   ./load-test.sh
+   # ATAU
+   hey -z 10s -c 10 http://localhost:8080/
+   ```
+
+3. **Amati Hasilnya**:
+   - **Grafana Dashboard:** Lihat lonjakan pada grafik "HTTP Requests Total".
+   - **Tempo:** Lihat distribusi latensi yang lebih bervariasi.
+   - **Loki:** Lihat ribuan log JSON yang terstruktur dengan korelasi `trace_id`.
 
 ## Troubleshooting
 - Jika dashboard tidak muncul: Pastikan folder `grafana/provisioning` memiliki izin baca.

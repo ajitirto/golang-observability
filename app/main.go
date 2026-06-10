@@ -57,11 +57,10 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			WithLabelValues(r.URL.Path).
 			Observe(duration)
 
-		log.WithFields(log.Fields{
+		WithTrace(ctx, log.Fields{
 			"path":       r.URL.Path,
 			"method":     r.Method,
 			"latency_ms": time.Since(start).Milliseconds(),
-			"trace":      span.SpanContext().TraceID().String(),
 		}).Info("request completed")
 	}()
 
